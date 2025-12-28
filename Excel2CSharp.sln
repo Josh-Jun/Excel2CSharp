@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excel2CSharp", "Excel2CSharp.csproj", "{DA3AF838-F274-4F66-8E9A-B60249B34215}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA3AF838-F274-4F66-8E9A-B60249B34215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA3AF838-F274-4F66-8E9A-B60249B34215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA3AF838-F274-4F66-8E9A-B60249B34215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA3AF838-F274-4F66-8E9A-B60249B34215}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EDAD55A2-B4B5-4250-A41A-29736CDADA33}
+	EndGlobalSection
+EndGlobal
