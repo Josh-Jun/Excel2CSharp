@@ -1,10 +1,10 @@
-﻿internal class Program
+﻿internal abstract class Program
 {
     private static void Main()
     {
         // Excel2CSharp
         string[] cmd_list = ["fl", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "--help"];
-        string cmd_key = "etc";
+        const string cmd_key = "etc";
         Console.WriteLine("################Excel2CSharp################");
 
         do
@@ -23,15 +23,15 @@
             }
             if(cmd_group.Length == 1)
             {
-                ExcuteCmd("--help");
+                ExecuteCmd("--help");
                 continue;
             }
-            for(int i = 1; i < cmd_group.Length; i++)
+            for(var i = 1; i < cmd_group.Length; i++)
             {
                 var cmd = cmd_group[i];
                 if (cmd_list.Contains(cmd))
                 {
-                    ExcuteCmd(cmd);
+                    ExecuteCmd(cmd);
                 }
                 else
                 {
@@ -42,7 +42,7 @@
         } while (true);
     }
 
-    private static void ExcuteCmd(string cmd)
+    private static void ExecuteCmd(string cmd)
     {
         Console.WriteLine($"输入命令为{cmd}");
     }
