@@ -1,11 +1,13 @@
-﻿internal abstract class Program
+﻿using Excel2CSharp.Tools;
+
+internal abstract class Program
 {
     private static readonly Dictionary<string, string> cmd_map = new ()
     {
         { "efl", "查看所有excel文件" },
         { "esl", "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)" },
         { "", "" },
-        { "export", "导出配置表" },
+        { "export", "导出配置表 \n    all:导出全部; \n    excel文件名(带后缀名):导出对应文件名所有工作簿sheet; \n    excel文件名(带后缀名)-工作簿sheet名:导出对应文件名的对应工作簿sheet名" },
         { "exit", "退出命令行模式" },
         { "help", "查看所有命令" },
     };
@@ -32,12 +34,19 @@
     private static int currentIndex = -1;
     // 表示前一个选项
     private static int previousIndex = -1;
+    
+    private static Dictionary<string, List<ConfigData>> excels = new();
 
     private static void Main()
     {
         // Excel2CSharp
-        var basePath = AppDomain.CurrentDomain.BaseDirectory;
-        // Console.WriteLine("程序集所在目录: " + basePath);
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "excel");
+        if (!Directory.Exists(path))
+        {
+            Console.WriteLine("Not Found Excel Path: " + path);
+            return;
+        }
+        excels = ExcelTools.GetAllExcelData(path);
         
         InitMenu(operate,  options);
         
@@ -58,16 +67,25 @@
                 }
                 if (key is { Key: ConsoleKey.Enter })
                 {
-                    operate = (OperateMode)currentIndex - startLine + 1;
+                    var index = currentIndex - startLine + 1;
+                    if (index < 0) index = 0;
+                    if (options != null && index > options.Length - 1) index = options.Length - 1;
+                    operate = (OperateMode)index;
                     Console.CursorVisible = true;
                     Console.ResetColor();
                     Console.Clear();
                     Console.SetCursorPosition(0, 0);
+                    currentIndex = -1;
+                    previousIndex = -1;
                     if (operate != OperateMode.None)
                     {
                         if (operate == OperateMode.Manual)
                         {
                             manualOptions.Clear();
+                            foreach (var file in excels.Keys)
+                            {
+                                manualOptions.Add(file);
+                            }
                             manualOptions.Add("退出");
                             InitMenu(operate, manualOptions.ToArray());
                         }
@@ -90,7 +108,9 @@
                 {
                     Console.SetCursorPosition(0, previousIndex);
                     Console.ResetColor();
-                    Console.Write("".PadLeft(Indicator.Length, ' ') + options[previousIndex - startLine]);
+                    var s = options[previousIndex - startLine];
+                    var menu = $"({Array.IndexOf(options, s)}) {s}";
+                    Console.Write("".PadLeft(Indicator.Length, ' ') + menu);
                 }
 
                 // 再看看当前项有没有超出范围
@@ -99,7 +119,12 @@
                 Console.BackgroundColor = ConsoleColor.Blue;    // 背景蓝色
                 // 设置当前选择项的标记
                 Console.SetCursorPosition(0, currentIndex);
-                Console.Write(Indicator + options?[currentIndex - startLine]);
+
+                if (options != null)
+                {
+                    var menu = $"({Array.IndexOf(options, options?[currentIndex - startLine])}) {options?[currentIndex - startLine]}";
+                    Console.WriteLine($"{Indicator}{menu}");
+                }
             }
             if (operate == OperateMode.Command)
             {
@@ -121,7 +146,7 @@
         {
             case OperateMode.None:
             case OperateMode.Manual:
-                Console.WriteLine("#       ↑↓ 选择操作, Enter 确认选择#       #");
+                Console.WriteLine("#       ↑↓ 选择操作, Enter 确认选择        #");
                 break;
             case OperateMode.Command:
                 Console.WriteLine("# 1. 命令以etc开头, 后面加空格和具体命令   #");
@@ -145,7 +170,8 @@
         // 先输出选项
         foreach (var s in menuOptions)
         {
-            Console.WriteLine(s.PadLeft(Indicator.Length + s.Length));
+            var menu = $"({Array.IndexOf(menuOptions, s)}) {s}";
+            Console.WriteLine(menu.PadLeft(Indicator.Length + menu.Length));
         }
     }
     
@@ -164,16 +190,22 @@
         }
         if (key is { Key: ConsoleKey.Enter })
         {
-            var option = manualOptions[previousIndex - startLine];
-            if (option == manualOptions[^1])
+            var index = currentIndex - startLine + 1;
+            if (index < 0) index = 0;
+            if (index > manualOptions.Count) index = manualOptions.Count;
+            
+            if (index == manualOptions.Count)
             {
                 operate = OperateMode.None;
                 Console.ResetColor();
                 Console.Clear();
                 Console.SetCursorPosition(0, 0);
                 InitMenu(operate,  options);
+                currentIndex = -1;
+                previousIndex = -1;
                 return;
             }
+            var option = manualOptions[index];
         }
 
         // 先清除前一个选项的标记
@@ -181,7 +213,9 @@
         {
             Console.SetCursorPosition(0, previousIndex);
             Console.ResetColor();
-            Console.Write("".PadLeft(Indicator.Length, ' ') + manualOptions[previousIndex - startLine]);
+            var s = manualOptions[previousIndex - startLine];
+            var _menu = $"({manualOptions.IndexOf(s)}) {s}";
+            Console.Write("".PadLeft(Indicator.Length, ' ') + _menu);
         }
 
         // 再看看当前项有没有超出范围
@@ -190,7 +224,9 @@
         Console.BackgroundColor = ConsoleColor.Blue;    // 背景蓝色
         // 设置当前选择项的标记
         Console.SetCursorPosition(0, currentIndex);
-        Console.Write(Indicator + manualOptions[currentIndex - startLine]);
+        
+        var menu = $"({manualOptions.IndexOf(manualOptions[currentIndex - startLine])}) {manualOptions[currentIndex - startLine]}";
+        Console.WriteLine($"{Indicator}{menu}");
     }
 
     private static void Command()
