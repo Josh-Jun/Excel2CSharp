@@ -71,7 +71,7 @@
                             manualOptions.Add("退出");
                             InitMenu(operate, manualOptions.ToArray());
                         }
-                        else if (operate == OperateMode.Command)
+                        if (operate == OperateMode.Command)
                         {
                             InitMenu(operate, null);
                             Console.CursorVisible = true;
