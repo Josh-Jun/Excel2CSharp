@@ -80,6 +80,6 @@ public struct ExcelData
 
 public struct ConfigData
 {
-    public string? name;
+    public string name;
     public ExcelData excelData;
 }
