@@ -80,6 +80,10 @@
                             manualOptions.Add("退出");
                             InitMenu(operate, manualOptions.ToArray());
                         }
+                        else if (operate == OperateMode.Command)
+                        {
+                            InitMenu(operate, null);
+                        }
                     }
                     else
                     {
