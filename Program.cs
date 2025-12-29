@@ -1,23 +1,14 @@
 ﻿internal abstract class Program
 {
-    private static readonly string[] cmd_list =
-    [
-        "efl", 
-        "esl", 
-        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-        "export", 
-        "exit", 
-        "help"
-    ];
-    private static readonly string[] cmd_document =
-    [
-        "查看所有excel文件", 
-        "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)", 
-        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-        "导出配置表", 
-        "退出命令行模式", 
-        "查看所有命令"
-    ];
+    private static readonly Dictionary<string, string> cmd_map = new ()
+    {
+        { "efl", "查看所有excel文件" },
+        { "esl", "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)" },
+        { "", "" },
+        { "export", "导出配置表" },
+        { "exit", "退出命令行模式" },
+        { "help", "查看所有命令" },
+    };
 
     private static readonly string[]? options = [ "手动模式", "命令行模式", ];
 
@@ -83,6 +74,7 @@
                         else if (operate == OperateMode.Command)
                         {
                             InitMenu(operate, null);
+                            Console.CursorVisible = true;
                         }
                     }
                     else
@@ -203,6 +195,7 @@
 
     private static void Command()
     {
+        var list = cmd_map.Keys.ToArray();
         Console.Write("请输入命令: ");
         var input = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(input))
@@ -219,15 +212,15 @@
 
         if (cmd_group.Length == 1)
         {
-            ExecuteCmd($"{cmd_list[^1]}");
+            ExecuteCmd($"{list[^1]}");
             return;
         }
 
         var cmd = cmd_group[1];
         var args = cmd_group.Skip(2).ToArray();
-        if (!cmd_list.Contains(cmd))
+        if (!list.Contains(cmd))
         {
-            Console.WriteLine($"etc: '{cmd}'不是etc命令,请使用'etc {cmd_list[^1]}'查看帮助");
+            Console.WriteLine($"etc: '{cmd}'不是etc命令,请使用'etc {list[^1]}'查看帮助");
             return;
         }
 
@@ -236,13 +229,15 @@
 
     private static void ExecuteCmd(string cmd, params string[] args)
     {
+        var list_key = cmd_map.Keys.ToArray();
+        var list_value = cmd_map.Values.ToArray();
         if (cmd == "help")
         {
-            for (var i = 0; i < cmd_list.Length; i++)
+            for (var i = 0; i < cmd_map.Keys.ToArray().Length; i++)
             {
-                if (!string.IsNullOrEmpty(cmd_list[i]))
+                if (!string.IsNullOrEmpty(cmd_map.Keys.ToArray()[i]))
                 {
-                    Console.WriteLine($" -- {cmd_list[i]}: {cmd_document[i]}");
+                    Console.WriteLine($" -- {list_key[i]}: {list_value[i]}");
                 }
             }
             return;
