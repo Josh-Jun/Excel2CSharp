@@ -4,8 +4,8 @@ internal abstract class Program
 {
     private static readonly Dictionary<string, string> cmd_map = new ()
     {
-        { "efl", "查看所有excel文件" },
-        { "esl", "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)" },
+        { "fl", "查看所有excel文件" },
+        { "sl", "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)" },
         { "", "" },
         { " ", " " },
         { "export", "导出配置表 \n    第一个参数:\n        all:导出全部; \n        excel文件名(带后缀名):导出对应文件名所有工作簿sheet; \n        excel文件名(带后缀名)-工作簿sheet名:导出对应文件名的对应工作簿sheet名\n    第二个参数:\n        json: 导出json格式数据\n        xml: 导出xml格式数据" },
@@ -15,7 +15,7 @@ internal abstract class Program
 
     private static readonly string[] options = [ "手动模式", "命令行模式", ];
 
-    private const string cmd_key = "etc";
+    private const string cmd_key = "ecs";
     private const string Indicator = "* "; // 前导符
 
     public enum OperateMode
@@ -139,7 +139,7 @@ internal abstract class Program
                 Console.WriteLine("#       ↑↓ 选择操作, Enter 确认选择        #");
                 break;
             case OperateMode.Command:
-                Console.WriteLine("# 1. 命令以etc开头, 后面加空格和具体命令   #");
+                Console.WriteLine($"# 1. 命令以{cmd_key}开头, 后面加空格和具体命令   #");
                 Console.WriteLine("# 2. 输入'exit'按回车键退出命令行模式      #");
                 Console.WriteLine("# 3. 输入'help'按回车键查看所有命令        #");
                 break;
@@ -361,7 +361,7 @@ internal abstract class Program
                 Console.SetCursorPosition(0, 0);
                 InitMenu(operate,  options);
                 return;
-            case "efl":
+            case "fl":
             {
                 foreach (var file in excels.Keys)
                 {
@@ -369,7 +369,7 @@ internal abstract class Program
                 }
                 return;
             }
-            case "esl":
+            case "sl":
             {
                 if (args.Length == 0)
                 {
