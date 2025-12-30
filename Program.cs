@@ -231,12 +231,12 @@ internal abstract class Program
                         if (manualOptions[index].EndsWith(".xlsx"))
                         {
                             InitManualMenuData(1, manualOptions[index]);
-                            InitMenu(operate, manualOptions.ToArray());
                         }
                         else
                         {
-                            ExecuteCmd("export", "all");
+                            InitManualMenuData(2);
                         }
+                        InitMenu(operate, manualOptions.ToArray());
                         return;
                     case 1:
                         InitManualMenuData(2);
@@ -249,7 +249,14 @@ internal abstract class Program
                 switch (manualLayer)
                 {
                     case 2:
-                        InitManualMenuData(1, excelFile);
+                        if (excelFile.EndsWith(".xlsx"))
+                        {
+                            InitManualMenuData(1, excelFile);
+                        }
+                        else
+                        {
+                            InitManualMenuData(0);
+                        }
                         InitMenu(operate, manualOptions.ToArray());
                         return;
                     case 1:
@@ -267,8 +274,10 @@ internal abstract class Program
             switch (manualLayer)
             {
                 case 2:
-                    var args = string.IsNullOrEmpty(excelSheet) ? $"{excelFile} {manualOptions[index].ToLower()}" : $"{excelFile}-{excelSheet} {manualOptions[index].ToLower()}";
-                    ExecuteCmd("export", args);
+                    if (string.IsNullOrEmpty(excelFile)) excelFile = "all";
+                    var arg1 = string.IsNullOrEmpty(excelSheet) ? $"{excelFile}" : $"{excelFile}-{excelSheet}";
+                    var arg2 = $"{manualOptions[index].ToLower()}";
+                    ExecuteCmd("export", arg1, arg2);
                     return;
                 case 1:
                     InitManualMenuData(2, manualOptions[index]);
