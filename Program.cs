@@ -8,7 +8,7 @@ internal abstract class Program
         { "esl", "查看excel所有工作簿sheet 参数是excel文件名(带后缀名)" },
         { "", "" },
         { " ", " " },
-        { "export", "导出配置表 \n    all:导出全部; \n    excel文件名(带后缀名):导出对应文件名所有工作簿sheet; \n    excel文件名(带后缀名)-工作簿sheet名:导出对应文件名的对应工作簿sheet名" },
+        { "export", "导出配置表 \n    第一个参数:\n        all:导出全部; \n        excel文件名(带后缀名):导出对应文件名所有工作簿sheet; \n        excel文件名(带后缀名)-工作簿sheet名:导出对应文件名的对应工作簿sheet名\n    第二个参数:\n        json: 导出json格式数据\n        xml: 导出xml格式数据" },
         { "exit", "退出命令行模式" },
         { "help", "查看所有命令" },
     };
@@ -76,7 +76,7 @@ internal abstract class Program
                     {
                         if (operate == OperateMode.Manual)
                         {
-                            InitManualMenuData();
+                            InitManualMenuData(0);
                             InitMenu(operate, manualOptions.ToArray());
                         }
                         if (operate == OperateMode.Command)
@@ -170,33 +170,40 @@ internal abstract class Program
         }
     }
     
-    private static bool isChildMenu = false;
-    private static void InitManualMenuData(string key =  "")
+    private static int manualLayer = 0;
+    private static void InitManualMenuData(int layer, string key =  "")
     {
+        manualLayer = layer;
         manualOptions.Clear();
-        if (string.IsNullOrEmpty(key))
+        switch (layer)
         {
-            manualOptions.Add("导出所有excel表");
-            foreach (var file in excels.Keys)
-            {
-                manualOptions.Add(file);
-            }
-            isChildMenu = false;
-            manualOptions.Add("退出");
-        }
-        else
-        {
-            manualOptions.Add($"导出[{key}]表");
-            excelFile = key;
-            foreach (var data in excels[key])
-            {
-                manualOptions.Add(data.name);
-            }
-            isChildMenu = true;
-            manualOptions.Add("返回");
+            case 0:
+                manualOptions.Add("导出所有excel表");
+                foreach (var file in excels.Keys)
+                {
+                    manualOptions.Add(file);
+                }
+                manualOptions.Add("退出");
+                break;
+            case 1:
+                manualOptions.Add($"导出[{key}]表");
+                excelFile = key;
+                foreach (var data in excels[key])
+                {
+                    manualOptions.Add(data.name);
+                }
+                manualOptions.Add("返回");
+                break;
+            case 2:
+                excelSheet = key;
+                manualOptions.Add("Json");
+                manualOptions.Add("Xml");
+                manualOptions.Add("返回");
+                break;
         }
     }
     private static string excelFile = "";
+    private static string excelSheet = "";
     private static void Manual()
     {
         var key = Console.ReadKey(true);
@@ -218,32 +225,59 @@ internal abstract class Program
             
             if (index == 0)
             {
-                ExecuteCmd("export", isChildMenu ? excelFile : "all");
-                return;
+                switch (manualLayer)
+                {
+                    case 0:
+                        if (manualOptions[index].EndsWith(".xlsx"))
+                        {
+                            InitManualMenuData(1, manualOptions[index]);
+                            InitMenu(operate, manualOptions.ToArray());
+                        }
+                        else
+                        {
+                            ExecuteCmd("export", "all");
+                        }
+                        return;
+                    case 1:
+                        InitManualMenuData(2);
+                        InitMenu(operate, manualOptions.ToArray());
+                        return;
+                }
             }
             if (index == manualOptions.Count - 1)
             {
-                if (isChildMenu)
+                switch (manualLayer)
                 {
-                    InitManualMenuData();
-                    InitMenu(operate, manualOptions.ToArray());
-                }
-                else
-                {
-                    operate = OperateMode.None;
-                    InitMenu(operate,  options);
+                    case 2:
+                        InitManualMenuData(1, excelFile);
+                        InitMenu(operate, manualOptions.ToArray());
+                        return;
+                    case 1:
+                        InitManualMenuData(0);
+                        InitMenu(operate, manualOptions.ToArray());
+                        return;
+                    case 0:
+                        operate = OperateMode.None;
+                        InitMenu(operate,  options);
+                        return;
                 }
                 return;
             }
 
-            if (manualOptions[index].EndsWith(".xlsx"))
+            switch (manualLayer)
             {
-                InitManualMenuData(manualOptions[index]);
-                InitMenu(operate,  manualOptions.ToArray());
-            }
-            else
-            {
-                ExecuteCmd("export", $"{excelFile}-{manualOptions[index]}");
+                case 2:
+                    var args = string.IsNullOrEmpty(excelSheet) ? $"{excelFile} {manualOptions[index].ToLower()}" : $"{excelFile}-{excelSheet} {manualOptions[index].ToLower()}";
+                    ExecuteCmd("export", args);
+                    return;
+                case 1:
+                    InitManualMenuData(2, manualOptions[index]);
+                    InitMenu(operate, manualOptions.ToArray());
+                    return;
+                case 0:
+                    InitManualMenuData(1, manualOptions[index]);
+                    InitMenu(operate, manualOptions.ToArray());
+                    return;
             }
         }
 
@@ -337,6 +371,11 @@ internal abstract class Program
             }
             case "esl":
             {
+                if (args.Length == 0)
+                {
+                    Console.WriteLine("excel文件名(带后缀名)不能为空");
+                    return;
+                }
                 var arg = args[0];
                 if (excels.TryGetValue(arg, out var excel))
                 {
@@ -353,8 +392,75 @@ internal abstract class Program
             }
             case "export":
             {
-                
-            } 
+                // Console.WriteLine($"输入命令为{cmd}, 参数为{string.Join(" ", args)}");
+                if (args.Length < 2)
+                {
+                    Console.WriteLine("至少包含两个参数,第一个为导表参数.第二个为数据类型");
+                    return;
+                }
+                var arg0 = args[0];
+                var arg1 = args[1];
+                var mold = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(arg1);
+                if (!Enum.TryParse<BuildTools.ConfigMold>(mold, out var configMold))
+                {
+                    Console.WriteLine("第二个参数不是正确的数据类型");
+                }
+                if (!arg0.Contains('-'))
+                {
+                    if (arg0 == "all")
+                    {
+                        foreach (var data in excels.SelectMany(excel => excel.Value))
+                        {
+                            if (data.excelData.datas.GetLength(1) < 5) continue;
+                            if (data.excelData.datas.GetLength(0) < 7) continue;
+                            BuildConfig(data.excelData, configMold);
+                        }
+                    }
+                    else if (arg0.EndsWith(".xlsx"))
+                    {
+                        foreach (var data in excels[arg0].Where(data => data.excelData.datas.GetLength(1) >= 5).Where(data => data.excelData.datas.GetLength(0) >= 7))
+                        {
+                            BuildConfig(data.excelData, configMold);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("第一个参数不是正确的表格名称");
+                    }
+                }
+                else
+                {
+                    var arg_split = arg0.Split('-');
+                    if (arg_split.Length != 2)
+                    {
+                        Console.WriteLine("第一个参数不正确");
+                        return;
+                    }
+                    if (!arg_split[0].EndsWith(".xlsx"))
+                    {
+                        Console.WriteLine("第一个参数不是正确的表格名称");
+                        return;
+                    }
+                    var data = excels[arg_split[0]].FirstOrDefault(data => data.name == arg_split[1]);
+                    BuildConfig(data.excelData, configMold);
+                }
+                return;
+            }
+        }
+    }
+    
+    private static void BuildConfig(ExcelData data, BuildTools.ConfigMold mold)
+    {
+        BuildTools.CreateCSharp(data, mold);
+        switch (mold)
+        {
+            case BuildTools.ConfigMold.Json:
+                BuildTools.CreateJsonConfig(data);
+                break;
+            case BuildTools.ConfigMold.Xml:
+                BuildTools.CreateXmlConfig(data);
+                break;
+            default:
                 break;
         }
     }
