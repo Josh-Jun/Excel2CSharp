@@ -104,8 +104,8 @@ internal abstract class Program
                 }
 
                 // 再看看当前项有没有超出范围
-                if (currentIndex < startLine) currentIndex = startLine;
-                if (options != null && currentIndex > options.Length + startLine - 1) currentIndex = options.Length + startLine - 1;
+                if (options != null && currentIndex < startLine) currentIndex = options.Length + startLine - 1;
+                if (options != null && currentIndex > options.Length + startLine - 1) currentIndex = startLine;
                 Console.BackgroundColor = ConsoleColor.Blue;    // 背景蓝色
                 // 设置当前选择项的标记
                 Console.SetCursorPosition(0, currentIndex);
@@ -292,8 +292,8 @@ internal abstract class Program
         }
 
         // 再看看当前项有没有超出范围
-        if (currentIndex < startLine) currentIndex = startLine;
-        if (currentIndex > manualOptions.Count + startLine - 1) currentIndex = manualOptions.Count + startLine - 1;
+        if (currentIndex < startLine) currentIndex = manualOptions.Count + startLine - 1;
+        if (currentIndex > manualOptions.Count + startLine - 1) currentIndex = startLine;
         Console.BackgroundColor = ConsoleColor.Blue;    // 背景蓝色
         // 设置当前选择项的标记
         Console.SetCursorPosition(0, currentIndex);
