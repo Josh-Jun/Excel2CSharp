@@ -348,7 +348,7 @@ internal abstract class Program
                 var list_value = cmd_map.Values.ToArray();
                 for (var i = 0; i < cmd_map.Keys.ToArray().Length; i++)
                 {
-                    if (!string.IsNullOrEmpty(cmd_map.Keys.ToArray()[i]))
+                    if (!string.IsNullOrWhiteSpace(cmd_map.Keys.ToArray()[i]))
                     {
                         Console.WriteLine($" -- {list_key[i]}: {list_value[i]}");
                     }
