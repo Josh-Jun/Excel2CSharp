@@ -156,12 +156,12 @@ internal abstract class Program
         Console.ResetColor();
         Console.Clear();
         Console.SetCursorPosition(0, 0);
-        currentIndex = -1;
-        previousIndex = -1;
         WriteTitle(mode);
         // 下面这行是隐藏光标，这样好看一些
         Console.CursorVisible = false;
         if (menuOptions == null) return;
+        currentIndex = menuOptions.Length + startLine;
+        previousIndex = menuOptions.Length + startLine;
         // 先输出选项
         foreach (var s in menuOptions)
         {
