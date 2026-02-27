@@ -338,7 +338,7 @@ internal abstract class Program
         var args = cmd_group.Skip(2).ToArray();
         if (!list.Contains(cmd))
         {
-            Console.WriteLine($"etc: '{cmd}'不是etc命令,请使用'etc {list[^1]}'查看帮助");
+            Console.WriteLine($"{cmd_key}: '{cmd}'不是{cmd_key}命令,请使用'{cmd_key} {list[^1]}'查看帮助");
             return;
         }
 
