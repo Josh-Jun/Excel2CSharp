@@ -288,6 +288,22 @@ public class BuildTools
 
     private static void SaveFile(string output, StringBuilder stringBuilder)
     {
+        if (!Directory.Exists($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml"))
+        {
+            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml");
+        }
+        if (!Directory.Exists($"{_basePath}/Assets/Bundles/Builtin/Configs/Json"))
+        {
+            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Json");
+        }
+        if (!Directory.Exists($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Xml"))
+        {
+            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml");
+        }
+        if (!Directory.Exists($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Json"))
+        {
+            Directory.CreateDirectory($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Json");
+        }
         var fs1 = new FileStream(output, FileMode.Create, FileAccess.Write);
         var sw = new StreamWriter(fs1);
         sw.WriteLine(stringBuilder.ToString()); //开始写入值

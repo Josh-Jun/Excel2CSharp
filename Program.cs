@@ -125,7 +125,6 @@ internal abstract class Program
                 Manual();
             }
         } while (true);
-        // ReSharper disable once FunctionNeverReturns
     }
     
     private static void WriteTitle(OperateMode mode)
@@ -460,17 +459,34 @@ internal abstract class Program
     
     private static void BuildConfig(ExcelData data, BuildTools.ConfigMold mold)
     {
-        BuildTools.CreateCSharp(data, mold);
-        switch (mold)
+        try
         {
-            case BuildTools.ConfigMold.Json:
-                BuildTools.CreateJsonConfig(data);
-                break;
-            case BuildTools.ConfigMold.Xml:
-                BuildTools.CreateXmlConfig(data);
-                break;
-            default:
-                break;
+            BuildTools.CreateCSharp(data, mold);
+            switch (mold)
+            {
+                case BuildTools.ConfigMold.Json:
+                    BuildTools.CreateJsonConfig(data);
+                    break;
+                case BuildTools.ConfigMold.Xml:
+                    BuildTools.CreateXmlConfig(data);
+                    break;
+                default:
+                    break;
+            }
+            if (operate == OperateMode.Manual)
+            {
+                InitManualMenuData(0);
+                InitMenu(operate, manualOptions.ToArray());
+            }
+            else
+            {
+                Console.WriteLine($"导表成功: {data.sheetName}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"导表失败: {data.sheetName}");
+            Console.WriteLine($"{e}");
         }
     }
 }
