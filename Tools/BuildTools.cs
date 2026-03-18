@@ -13,6 +13,33 @@ public class BuildTools
     }
     
     private static readonly string _basePath = new DirectoryInfo("../..").FullName;
+    
+    private static string? script_output_path;
+    private static string ScriptOutputPath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(script_output_path)) return script_output_path;
+            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output_path_config.txt");
+            var config = File.ReadAllText(configPath);
+            script_output_path = config.Split('\n')[0].Split('=')[^1];
+            return script_output_path;
+        }
+    }
+    
+    private static string? config_output_path;
+    private static string ConfigOutputPath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(config_output_path)) return config_output_path;
+            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output_path_config.txt");
+            var config = File.ReadAllText(configPath);
+            config_output_path = config.Split('\n')[1].Split('=')[^1];
+            return config_output_path;
+        }
+    }
+    
     public static void CreateCSharp(ExcelData data, ConfigMold mold)
     {
         var stringBuilder = new StringBuilder();
@@ -93,8 +120,12 @@ public class BuildTools
 
         stringBuilder.Append('}');
 
-        var output = $"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/{mold}/{data.sheetName}{mold}Config.cs";
-        SaveFile(output, stringBuilder);
+        var output = $"{_basePath}/{ScriptOutputPath}/{mold}";
+        if (!Directory.Exists(output))
+        {
+            Directory.CreateDirectory(output);
+        }
+        SaveFile($"{output}/{data.sheetName}{mold}Config.cs", stringBuilder);
     }
 
     public static void CreateJsonCSharp(ExcelData data, ref StringBuilder stringBuilder)
@@ -190,8 +221,12 @@ public class BuildTools
 
         stringBuilder.Append('}');
 
-        var output = $"{_basePath}/Assets/Bundles/Builtin/Configs/Json/{data.sheetName}JsonData.json";
-        SaveFile(output, stringBuilder);
+        var output = $"{_basePath}/{ConfigOutputPath}/Json";
+        if (!Directory.Exists(output))
+        {
+            Directory.CreateDirectory(output);
+        }
+        SaveFile($"{output}/{data.sheetName}JsonData.json", stringBuilder);
     }
 
     private static string GetJsonData(string dataStr, string typeStr)
@@ -282,28 +317,16 @@ public class BuildTools
 
         stringBuilder.Append($"</{data.sheetName}XmlData>");
 
-        var output = $"{_basePath}/Assets/Bundles/Builtin/Configs/Xml/{data.sheetName}XmlData.xml";
-        SaveFile(output, stringBuilder);
+        var output = $"{_basePath}/{ConfigOutputPath}/Xml";
+        if (!Directory.Exists(output))
+        {
+            Directory.CreateDirectory(output);
+        }
+        SaveFile($"{output}/{data.sheetName}XmlData.xml", stringBuilder);
     }
 
     private static void SaveFile(string output, StringBuilder stringBuilder)
     {
-        if (!Directory.Exists($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml"))
-        {
-            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml");
-        }
-        if (!Directory.Exists($"{_basePath}/Assets/Bundles/Builtin/Configs/Json"))
-        {
-            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Json");
-        }
-        if (!Directory.Exists($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Xml"))
-        {
-            Directory.CreateDirectory($"{_basePath}/Assets/Bundles/Builtin/Configs/Xml");
-        }
-        if (!Directory.Exists($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Json"))
-        {
-            Directory.CreateDirectory($"{_basePath}/Assets/App/Scripts/Frame/Core/Master/Config/Json");
-        }
         var fs1 = new FileStream(output, FileMode.Create, FileAccess.Write);
         var sw = new StreamWriter(fs1);
         sw.WriteLine(stringBuilder.ToString()); //开始写入值
