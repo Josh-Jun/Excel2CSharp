@@ -187,10 +187,11 @@ public class BuildTools
         stringBuilder.AppendLine("{");
         stringBuilder.AppendLine($"  \"{data.sheetName}s\": [");
 
+        var sbs1 = new List<string>();
+        var sbs2 = new List<string>();
         for (var r = 6; r < data.datas.GetLength(0); r++)
         {
             if ($"{data.datas[r, 1]}".Contains('#') || $"{data.datas[r, 2]}".Contains('#')) continue;
-            stringBuilder.AppendLine("    {");
             for (var c = 3; c < data.datas.GetLength(1); c++)
             {
                 if ($"{data.datas[1, c]}".Contains('#') || $"{data.datas[2, c]}".Contains('#')) continue;
@@ -208,14 +209,14 @@ public class BuildTools
                     }
                 }
 
-                var _str = c == data.datas.GetLength(1) - 1 ? "" : ",";
-                if (dataStr == null || typeStr == null) continue;
-                stringBuilder.AppendLine($"      \"{data.datas[4, c]}\": {GetJsonData(dataStr, typeStr)}{_str}");
+                if (dataStr != null && typeStr != null) sbs2.Add($"      \"{data.datas[4, c]}\": {GetJsonData(dataStr, typeStr)}");
             }
-
-            var str = data.datas.GetLength(0) - 1 == r ? "    }" : "    },";
-            stringBuilder.AppendLine(str);
+            var sb2 = string.Join($",{Environment.NewLine}", sbs2);
+            sbs1.Add($"    {{{Environment.NewLine}{sb2}{Environment.NewLine}    }}");
         }
+            
+        var sb1 = string.Join($",{Environment.NewLine}", sbs1);
+        stringBuilder.AppendLine(sb1);
 
         stringBuilder.AppendLine("  ]");
 
